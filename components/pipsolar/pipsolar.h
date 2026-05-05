@@ -192,6 +192,11 @@ class Pipsolar : public uart::UARTDevice, public PollingComponent {
   PIPSOLAR_SWITCH(pv_power_balance_switch, QPIRI)
 
   PIPSOLAR_SELECT(output_source_priority_select, QPIRI)
+  PIPSOLAR_SELECT(charger_source_priority_select, QPIRI)
+  
+  PIPSOLAR_SELECT(current_max_ac_charging_current_select, QPIRI)
+  PIPSOLAR_SELECT(current_max_charging_current_select, QPIRI)
+  
   PIPSOLAR_VALUED_SELECT(charging_discharging_control_select, QBATCD, std::string)
 
   void switch_command(const std::string &command);
