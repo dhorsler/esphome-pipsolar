@@ -1,6 +1,7 @@
 #include "pipsolar.h"
-#include "pipsolar_select.h"
+#include "esphome/core/helpers.h"
 #include "esphome/core/log.h"
+#include "pipsolar_select.h"
 
 namespace esphome {
 namespace pipsolar {
