@@ -1,4 +1,5 @@
 #include "pipsolar.h"
+#include "pipsolar_select.h"
 #include "esphome/core/log.h"
 
 namespace esphome {
