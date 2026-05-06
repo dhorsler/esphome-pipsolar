@@ -112,9 +112,21 @@ void Pipsolar::loop() {
         if (this->current_max_ac_charging_current_) {
           this->current_max_ac_charging_current_->publish_state(value_current_max_ac_charging_current_);
         }
+        //  select for current_max_ac_charging_current
+        if (this->current_max_ac_charging_current_select_) {
+          std::string value = esphome::to_string(value_current_max_ac_charging_current_);
+          this->current_max_ac_charging_current_select_->map_and_publish(value);
+        }
+        
         if (this->current_max_charging_current_) {
           this->current_max_charging_current_->publish_state(value_current_max_charging_current_);
         }
+         //select for current_max_charging_current
+        if (this->current_max_charging_current_select_) {
+          std::string value = esphome::to_string(value_current_max_charging_current_);
+          this->current_max_charging_current_select_->map_and_publish(value);
+        }
+
         if (this->input_voltage_range_) {
           this->input_voltage_range_->publish_state(value_input_voltage_range_);
         }
@@ -143,6 +155,25 @@ void Pipsolar::loop() {
         if (this->charger_source_priority_) {
           this->charger_source_priority_->publish_state(value_charger_source_priority_);
         }
+        // special for charger source priority select
+        if (this->charger_source_priority_select_) {
+          std::string value = esphome::to_string(value_charger_source_priority_);
+          this->charger_source_priority_select_->map_and_publish(value);
+        }
+        // special for charger source priority switches
+        if (this->charger_source_priority_util_only_switch) {
+          this->charger_source_priority_util_only_switch->publish_state(value_charger_source_priority_ == 0);
+        }
+        if (this->charger_source_priority_solar_first) {
+          this->charger_source_priority_solar_first->publish_state(value_charger_source_priority_ == 1);
+        }
+        if (this->charger_source_priority_solar_util) {
+          this->charger_source_priority_solar_util->publish_state(value_charger_source_priority_ == 2);
+        }
+        if (this->charger_source_priority_solar_only) {
+          this->charger_source_priority_solar_only->publish_state(value_charger_source_priority_ == 3);
+        }
+		
         if (this->parallel_max_num_) {
           this->parallel_max_num_->publish_state(value_parallel_max_num_);
         }
