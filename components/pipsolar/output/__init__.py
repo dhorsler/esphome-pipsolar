@@ -55,8 +55,8 @@ TYPES = {
     ),
     CONF_BATTERY_FLOAT_VOLTAGE: ([48.0, 49.0, 50.0, 51.0], "PBFT%02.1f"),
     CONF_BATTERY_TYPE: ([0, 1, 2], "PBT%02.0f"),
-    CONF_CURRENT_MAX_AC_CHARGING_CURRENT: ([2, 10, 20], "MUCHGC0%02.0f"),
-    CONF_CURRENT_MAX_CHARGING_CURRENT: ([10, 20, 30, 40], "MCHGC0%02.0f"),
+    CONF_CURRENT_MAX_AC_CHARGING_CURRENT: ([2, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120], "MUCHGC%04.0f"),
+    CONF_CURRENT_MAX_CHARGING_CURRENT: ([ 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120 ], "MCHGC%03.0f"),
     CONF_OUTPUT_SOURCE_PRIORITY: ([0, 1, 2], "POP%02.0f"),
     CONF_CHARGER_SOURCE_PRIORITY: ([0, 1, 2, 3], "PCP%02.0f"),
     CONF_BATTERY_REDISCHARGE_VOLTAGE: (
@@ -99,14 +99,15 @@ async def to_code(config):
     SetOutputAction,
     cv.Schema(
         {
-            cv.Required(CONF_ID): cv.use_id(CONF_ID),
+            cv.Required(CONF_ID): cv.use_id(PipsolarOutput),
             cv.Required(CONF_VALUE): cv.templatable(cv.positive_float),
         }
     ),
+    synchronous=True,
 )
-def output_pipsolar_set_level_to_code(config, action_id, template_arg, args):
-    paren = yield cg.get_variable(config[CONF_ID])
+async def output_pipsolar_set_level_to_code(config, action_id, template_arg, args):
+    paren = await cg.get_variable(config[CONF_ID])
     var = cg.new_Pvariable(action_id, template_arg, paren)
-    template_ = yield cg.templatable(config[CONF_VALUE], args, float)
+    template_ = await cg.templatable(config[CONF_VALUE], args, cg.float_)
     cg.add(var.set_level(template_))
-    yield var
+    return var
