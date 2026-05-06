@@ -4,7 +4,6 @@ from esphome.components import select
 from esphome.const import CONF_ID, CONF_OPTIMISTIC
 
 from .. import CONF_PIPSOLAR_ID, PIPSOLAR_COMPONENT_SCHEMA, pipsolar_ns
-from ..const import CONF_CHARGER_SOURCE_PRIORITY, CONF_OUTPUT_SOURCE_PRIORITY
 
 DEPENDENCIES = ["uart"]
 
@@ -13,11 +12,7 @@ CONF_OPTIONSMAP = "optionsmap"
 CONF_STATUSMAP = "statusmap"
 
 CONF_OUTPUT_SOURCE_PRIORITY = "output_source_priority"
-CONF_CHARGER_SOURCE_PRIORITY = "charger_source_priority"
 CONF_CHARGING_DISCHARGING_CONTROL = "charging_discharging_control"
-CONF_CURRENT_MAX_CHARGING_CURRENT = "current_max_charging_current"
-CONF_CURRENT_MAX_AC_CHARGING_CURRENT = "current_max_ac_charging_current"
-
 
 PipsolarSelect = pipsolar_ns.class_("PipsolarSelect", cg.Component, select.Select)
 
@@ -79,23 +74,17 @@ def ensure_option_map():
 
 TYPES = {
     CONF_OUTPUT_SOURCE_PRIORITY: ("POP00", None),
-    CONF_CHARGER_SOURCE_PRIORITY: ("PCP03", None),
     CONF_CHARGING_DISCHARGING_CONTROL: ("PBATCD111", None),
-    CONF_CURRENT_MAX_CHARGING_CURRENT: ("MCHGC010", None),
-    CONF_CURRENT_MAX_AC_CHARGING_CURRENT: ("MUCHGC0002", None),
 }
 
 
-PIPSELECT_SCHEMA = (
-    select.select_schema(PipsolarSelect)
-    .extend(
-        {
-            cv.Optional(CONF_OPTIONSMAP): ensure_option_map(),
-            cv.Optional(CONF_STATUSMAP): ensure_option_map(),
-        }
-    )
-    .extend(cv.COMPONENT_SCHEMA)
-)
+PIPSELECT_SCHEMA = cv.COMPONENT_SCHEMA.extend(
+    {
+        cv.GenerateID(): cv.declare_id(PipsolarSelect),
+        cv.Optional(CONF_OPTIONSMAP): ensure_option_map(),
+        cv.Optional(CONF_STATUSMAP): ensure_option_map(),
+    }
+).extend(select.select_schema(PipsolarSelect))
 
 
 CONFIG_SCHEMA = PIPSOLAR_COMPONENT_SCHEMA.extend(

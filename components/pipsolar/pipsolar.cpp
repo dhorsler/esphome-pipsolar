@@ -1,7 +1,5 @@
 #include "pipsolar.h"
-#include "esphome/core/helpers.h"
 #include "esphome/core/log.h"
-#include "pipsolar_select.h"
 
 namespace esphome {
 namespace pipsolar {
@@ -14,12 +12,9 @@ void Pipsolar::setup() {
 }
 
 void Pipsolar::empty_uart_buffer_() {
-  uint8_t buf[64];
-  size_t avail;
-  while ((avail = this->available()) > 0) {
-    if (!this->read_array(buf, std::min(avail, sizeof(buf)))) {
-      break;
-    }
+  uint8_t byte;
+  while (this->available()) {
+    this->read_byte(&byte);
   }
 }
 
@@ -117,21 +112,9 @@ void Pipsolar::loop() {
         if (this->current_max_ac_charging_current_) {
           this->current_max_ac_charging_current_->publish_state(value_current_max_ac_charging_current_);
         }
-        //  select for current_max_ac_charging_current
-        if (this->current_max_ac_charging_current_select_) {
-          std::string value = esphome::to_string(value_current_max_ac_charging_current_);
-          this->current_max_ac_charging_current_select_->map_and_publish(value);
-        }
-        
         if (this->current_max_charging_current_) {
           this->current_max_charging_current_->publish_state(value_current_max_charging_current_);
         }
-         //select for current_max_charging_current
-        if (this->current_max_charging_current_select_) {
-          std::string value = esphome::to_string(value_current_max_charging_current_);
-          this->current_max_charging_current_select_->map_and_publish(value);
-        }
-
         if (this->input_voltage_range_) {
           this->input_voltage_range_->publish_state(value_input_voltage_range_);
         }
@@ -139,8 +122,7 @@ void Pipsolar::loop() {
         if (this->input_voltage_range_switch_) {
           this->input_voltage_range_switch_->publish_state(value_input_voltage_range_ == 1);
         }
-        
-		if (this->output_source_priority_) {
+        if (this->output_source_priority_) {
           this->output_source_priority_->publish_state(value_output_source_priority_);
         }
         // special for output source priority select
@@ -158,30 +140,9 @@ void Pipsolar::loop() {
         if (this->output_source_priority_battery_switch_) {
           this->output_source_priority_battery_switch_->publish_state(value_output_source_priority_ == 2);
         }
-		
-		
         if (this->charger_source_priority_) {
           this->charger_source_priority_->publish_state(value_charger_source_priority_);
         }
-        // special for charger source priority select
-        if (this->charger_source_priority_select_) {
-          std::string value = esphome::to_string(value_charger_source_priority_);
-          this->charger_source_priority_select_->map_and_publish(value);
-        }
-        // special for charger source priority switches
-        if (this->charger_source_priority_util_only_switch) {
-          this->charger_source_priority_util_only_switch->publish_state(value_charger_source_priority_ == 0);
-        }
-        if (this->charger_source_priority_solar_first) {
-          this->charger_source_priority_solar_first->publish_state(value_charger_source_priority_ == 1);
-        }
-        if (this->charger_source_priority_solar_util) {
-          this->charger_source_priority_solar_util->publish_state(value_charger_source_priority_ == 2);
-        }
-        if (this->charger_source_priority_solar_only) {
-          this->charger_source_priority_solar_only->publish_state(value_charger_source_priority_ == 3);
-        }
-		
         if (this->parallel_max_num_) {
           this->parallel_max_num_->publish_state(value_parallel_max_num_);
         }
@@ -641,7 +602,7 @@ void Pipsolar::loop() {
         // '(00000000000000000000000000000000'
         // iterate over all available flag (as not all models have all flags, but at least in the same order)
         this->value_warnings_present_ = false;
-        this->value_faults_present_ = false;
+        this->value_faults_present_ = true;
 
         for (size_t i = 1; i < strlen(tmp); i++) {
           enabled = tmp[i] == '1';
@@ -851,45 +812,27 @@ void Pipsolar::loop() {
   }
 
   if (this->state_ == STATE_COMMAND || this->state_ == STATE_POLL) {
-    size_t avail = this->available();
-    while (avail > 0) {
-      uint8_t buf[64];
-      size_t to_read = std::min(avail, sizeof(buf));
-      if (!this->read_array(buf, to_read)) {
-        break;
-      }
-      avail -= to_read;
-      bool done = false;
-      for (size_t i = 0; i < to_read; i++) {
-        uint8_t byte = buf[i];
+    while (this->available()) {
+      uint8_t byte;
+      this->read_byte(&byte);
 
-        // make sure data and null terminator fit in buffer
-        if (this->read_pos_ >= PIPSOLAR_READ_BUFFER_LENGTH - 1) {
-          this->read_pos_ = 0;
-          this->empty_uart_buffer_();
-          ESP_LOGW(TAG, "response data too long, discarding.");
-          done = true;
-          break;
-        }
-        this->read_buffer_[this->read_pos_] = byte;
-        this->read_pos_++;
-
-        // end of answer
-        if (byte == 0x0D) {
-          this->read_buffer_[this->read_pos_] = 0;
-          this->empty_uart_buffer_();
-          if (this->state_ == STATE_POLL) {
-            this->state_ = STATE_POLL_COMPLETE;
-          }
-          if (this->state_ == STATE_COMMAND) {
-            this->state_ = STATE_COMMAND_COMPLETE;
-          }
-          done = true;
-          break;
-        }
+      if (this->read_pos_ == PIPSOLAR_READ_BUFFER_LENGTH) {
+        this->read_pos_ = 0;
+        this->empty_uart_buffer_();
       }
-      if (done) {
-        break;
+      this->read_buffer_[this->read_pos_] = byte;
+      this->read_pos_++;
+
+      // end of answer
+      if (byte == 0x0D) {
+        this->read_buffer_[this->read_pos_] = 0;
+        this->empty_uart_buffer_();
+        if (this->state_ == STATE_POLL) {
+          this->state_ = STATE_POLL_COMPLETE;
+        }
+        if (this->state_ == STATE_COMMAND) {
+          this->state_ = STATE_COMMAND_COMPLETE;
+        }
       }
     }  // available
   }
@@ -946,13 +889,8 @@ uint8_t Pipsolar::send_next_command_() {
   if (this->command_queue_[this->command_queue_position_].length() != 0) {
     const char *command = this->command_queue_[this->command_queue_position_].c_str();
     uint8_t byte_command[16];
-    size_t length = this->command_queue_[this->command_queue_position_].length();
-    if (length > sizeof(byte_command)) {
-      ESP_LOGE(TAG, "Command too long: %zu", length);
-      this->command_queue_[this->command_queue_position_].clear();
-      return 0;
-    }
-    for (size_t i = 0; i < length; i++) {
+    uint8_t length = this->command_queue_[this->command_queue_position_].length();
+    for (uint8_t i = 0; i < length; i++) {
       byte_command[i] = (uint8_t) this->command_queue_[this->command_queue_position_].at(i);
     }
     this->state_ = STATE_COMMAND;

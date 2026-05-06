@@ -1,14 +1,14 @@
 #pragma once
 
 #include "esphome/components/binary_sensor/binary_sensor.h"
-#include "esphome/components/select/select.h"
 #include "esphome/components/sensor/sensor.h"
 #include "esphome/components/switch/switch.h"
+#include "esphome/components/select/select.h"
+#include "esphome/components/pipsolar/select/pipsolar_select.h"
 #include "esphome/components/text_sensor/text_sensor.h"
 #include "esphome/components/uart/uart.h"
 #include "esphome/core/automation.h"
 #include "esphome/core/component.h"
-#include "esphome/core/helpers.h"
 
 namespace esphome {
 namespace pipsolar {
@@ -187,22 +187,11 @@ class Pipsolar : public uart::UARTDevice, public PollingComponent {
   PIPSOLAR_SWITCH(output_source_priority_utility_switch, QPIRI)
   PIPSOLAR_SWITCH(output_source_priority_solar_switch, QPIRI)
   PIPSOLAR_SWITCH(output_source_priority_battery_switch, QPIRI)
-  
-  PIPSOLAR_SWITCH(charger_source_priority_util_only_switch, QPIRI)
-  PIPSOLAR_SWITCH(charger_source_priority_solar_first_switch, QPIRI)
-  PIPSOLAR_SWITCH(charger_source_priority_solar_util_switch, QPIRI)
-  PIPSOLAR_SWITCH(charger_source_priority_solar_only_switch, QPIRI)
-  
   PIPSOLAR_SWITCH(input_voltage_range_switch, QPIRI)
   PIPSOLAR_SWITCH(pv_ok_condition_for_parallel_switch, QPIRI)
   PIPSOLAR_SWITCH(pv_power_balance_switch, QPIRI)
 
   PIPSOLAR_SELECT(output_source_priority_select, QPIRI)
-  PIPSOLAR_SELECT(charger_source_priority_select, QPIRI)
-  
-  PIPSOLAR_SELECT(current_max_ac_charging_current_select, QPIRI)
-  PIPSOLAR_SELECT(current_max_charging_current_select, QPIRI)
-  
   PIPSOLAR_VALUED_SELECT(charging_discharging_control_select, QBATCD, std::string)
 
   void switch_command(const std::string &command);
