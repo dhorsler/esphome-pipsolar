@@ -173,7 +173,6 @@ void Pipsolar::loop() {
         if (this->charger_source_priority_solar_only_switch_) {
           this->charger_source_priority_solar_only_switch_->publish_state(value_charger_source_priority_ == 3);
         }
-		
         if (this->parallel_max_num_) {
           this->parallel_max_num_->publish_state(value_parallel_max_num_);
         }

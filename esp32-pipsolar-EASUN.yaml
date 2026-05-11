@@ -1,0 +1,290 @@
+substitutions:
+  name: smh-iii
+  tx_pin: GPIO17
+  rx_pin: GPIO34
+
+esphome:
+  name: ${name}
+  friendly_name: ${name}
+  project:
+#    name: "syssi.esphome-pipsolar@main"
+    name: "dhorsler.esphome-pipsolar@main"
+    version: 1.0.0
+
+esp32:
+  #board: 
+  variant: esp32
+  framework: 
+    type: esp-idf
+
+wifi:
+  ssid: DHA_Rolo
+  password: 0206080500
+
+ota:
+  platform: esphome
+
+logger:
+  baud_rate: 0
+#  level: DEBUG
+
+# If you use Home Assistant please remove this `mqtt` section and uncomment the `api` component!
+# The native API has many advantages over MQTT: https://esphome.io/components/api.html#advantages-over-mqtt
+#mqtt:
+#  broker: !secret mqtt_host
+#  username: !secret mqtt_username
+#  password: !secret mqtt_password
+#  id: mqtt_client
+
+api:
+
+uart:
+  - id: uart_0
+    baud_rate: 2400
+    tx_pin: ${tx_pin}
+    rx_pin: ${rx_pin}
+    debug:
+      direction: BOTH
+      dummy_receiver: false
+      after:
+        delimiter: "\r"
+      sequence:
+        - lambda: UARTDebug::log_string(direction, bytes);
+
+external_components:
+  - source: github://dhorsler/esphome-pipsolar@main
+    refresh: 0s
+    
+pipsolar:
+  uart_id: uart_0
+  id: inverter0
+
+sensor:
+  - platform: pipsolar
+    pipsolar_id: inverter0
+    # QPIRI
+    grid_rating_voltage:
+      name: "grid rating voltage"
+    grid_rating_current:
+      name: "grid rating current"
+    ac_output_rating_voltage:
+      name: "ac output rating voltage"
+    ac_output_rating_frequency:
+      name: "ac output rating frequency"
+    ac_output_rating_current:
+      name: "ac output rating current"
+    ac_output_rating_apparent_power:
+      name: "ac output rating apparent power"
+    ac_output_rating_active_power:
+      name: "ac output rating active power"
+    battery_rating_voltage:
+      name: "battery rating voltage"
+    battery_recharge_voltage:
+      name: "battery recharge voltage"
+    battery_under_voltage:
+      name: "battery under voltage"
+    battery_bulk_voltage:
+      name: "battery bulk voltage"
+    battery_float_voltage:
+      name: "battery float voltage"
+    battery_type:
+      name: "battery type"
+    current_max_ac_charging_current:
+      name: "current max ac charging current"
+    current_max_charging_current:
+      name: "current max charging current"
+    input_voltage_range:
+      name: "input voltage range"
+    output_source_priority:
+      name: "output source priority"
+    charger_source_priority:
+      name: "charger source priority"
+    parallel_max_num:
+      name: "parallel max num"
+    machine_type:
+      name: "machine type"
+    topology:
+      name: "topology"
+    output_mode:
+      name: "output mode"
+    battery_redischarge_voltage:
+      name: "battery redischarge voltage"
+    pv_ok_condition_for_parallel:
+      name: "pv ok condition for parallel"
+    pv_power_balance:
+      name: "pv power balance"
+
+    # QPIGS
+    grid_voltage:
+      name: "grid voltage"
+    grid_frequency:
+      name: "grid frequency"
+    ac_output_voltage:
+      name: "ac output voltage"
+    ac_output_frequency:
+      name: "ac output frequency"
+    ac_output_apparent_power:
+      name: "ac output apparent power"
+    ac_output_active_power:
+      name: "ac output active power"
+    output_load_percent:
+      name: "output load percent"
+    bus_voltage:
+      name: "bus voltage"
+    battery_voltage:
+      name: "battery voltage"
+    battery_charging_current:
+      name: "battery charging current"
+    battery_capacity_percent:
+      name: "battery capacity percent"
+    inverter_heat_sink_temperature:
+      name: "inverter heat sink temperature"
+    pv_input_current_for_battery:
+      name: "pv input current for battery"
+    pv_input_voltage:
+      name: "pv input voltage"
+    battery_voltage_scc:
+      name: "battery voltage scc"
+    battery_discharge_current:
+      name: "battery discharge current"
+    battery_voltage_offset_for_fans_on:
+      name: "battery voltage offset for fans on"
+#    eeprom_version:
+#      name: "eeprom version"
+    pv_charging_power:
+      name: "pv charging power"
+
+text_sensor:
+  - platform: pipsolar
+    pipsolar_id: inverter0
+    device_mode:
+      name: "device mode"
+      filters:
+        map:
+          - P -> Power on mode
+          - S -> Standby mode
+          - L -> Line mode
+          - B -> Battery mode
+          - F -> Fault mode
+          - D -> Shutdown mode
+    last_qpigs:
+      name: "last qpigs"
+    last_qpiri:
+      name: "last qpiri"
+    last_qmod:
+      name: "last qmod"
+    last_qflag:
+      name: "last qflag"
+
+binary_sensor:
+  - platform: pipsolar
+    pipsolar_id: inverter0
+    add_sbu_priority_version:
+      name: "add sbu priority version"
+    configuration_status:
+      name: "configuration status"
+#    scc_firmware_version:
+#      name: "scc firmware version"
+    load_status:
+      name: "load status"
+    battery_voltage_to_steady_while_charging:
+      name: "battery voltage to steady while charging"
+    charging_status:
+      name: "charging status"
+    scc_charging_status:
+      name: "scc charging status"
+    ac_charging_status:
+      name: "ac charging status"
+    charging_to_floating_mode:
+      name: "charging to floating mode"
+    switch_on:
+      name: "switch on"
+#    dustproof_installed:
+#      name: "dustproof installed"
+    silence_buzzer_open_buzzer:
+      name: "silence buzzer open buzzer"
+    overload_bypass_function:
+      name: "overload bypass function"
+    lcd_escape_to_default:
+      name: "lcd escape to default"
+    overload_restart_function:
+      name: "overload restart function"
+    over_temperature_restart_function:
+      name: "over temperature restart function"
+#    backlight_on:
+#      name: "backlight on"
+
+switch:
+  - platform: pipsolar
+    pipsolar_id: inverter0
+    output_source_priority_utility:
+      name: "output source priority utility"
+    output_source_priority_solar:
+      name: "output source priority solar"
+    output_source_priority_battery:
+      name: "output source priority battery"
+    charger_source_priority_util_only:
+      name: "charger source priority utility only"
+    charger_source_priority_solar_first:
+      name: "charger source priority solar first"
+    charger_source_priority_solar_util:
+      name: "charger source priority solar and util"
+    charger_source_priority_solar_only:
+      name: "charger source priority solar only"  
+    input_voltage_range:
+      name: "input voltage range"
+    pv_ok_condition_for_parallel:
+      name: "pv ok condition for parallel"
+    pv_power_balance:
+      name: "pv power balance"
+
+output:
+  - platform: pipsolar
+    pipsolar_id: inverter0
+    battery_recharge_voltage:
+      id: inverter0_battery_recharge_voltage_out
+
+select:
+  - platform: pipsolar
+    pipsolar_id: inverter0
+    output_source_priority:
+      id: inverter0_output_source_priority_select
+      name: inverter0_output_source_priority_select
+      optionsmap:
+        "Utility first": "POP00"
+        "Solar only": "POP01"
+        "Solar Battery Utility": "POP02"
+      statusmap:
+        "0": "Utility first"
+        "1": "Solar only"
+        "2": "Solar Battery Utility"
+
+#select:
+  - platform: pipsolar
+    pipsolar_id: inverter0
+    charger_source_priority:
+      id: inverter0_charger_source_priority_select
+      name: inverter0_charger_source_priority_select
+      optionsmap:
+        "Solar first": "PCP01"
+        "Solar and utility": "PCP02"
+        "Solar charging only": "PCP03"
+      statusmap:
+        "1": "Solar first"
+        "2": "Solar and utility"
+        "3": "Solar charging only"
+#select:
+#  - platform: pipsolar
+#    pipsolar_id: inverter0
+#    output_source_priority:
+#      id: ${id}_output_source_priority_select
+#      name: ${name} Output Source Priority Select
+#      optionsmap:
+#        "Utility first": "POP00"
+#        "Solar only": "POP01"
+#        "Solar Battery Utility": "POP02"
+#      statusmap:
+#        "0": "Utility first"
+#        "1": "Solar only"
+#        "2": "Solar Battery Util"
+      
