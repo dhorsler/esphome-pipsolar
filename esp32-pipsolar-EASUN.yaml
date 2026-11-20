@@ -223,8 +223,6 @@ switch:
       name: "output source priority solar"
     output_source_priority_battery:
       name: "output source priority battery"
-    charger_source_priority_util_only:
-      name: "charger source priority utility only"
     charger_source_priority_solar_first:
       name: "charger source priority solar first"
     charger_source_priority_solar_util:

@@ -161,9 +161,6 @@ void Pipsolar::loop() {
           this->charger_source_priority_select_->map_and_publish(value);
         }
         // special for charger source priority switches
-        if (this->charger_source_priority_util_only_switch_) {
-          this->charger_source_priority_util_only_switch_->publish_state(value_charger_source_priority_ == 0);
-        }
         if (this->charger_source_priority_solar_first_switch_) {
           this->charger_source_priority_solar_first_switch_->publish_state(value_charger_source_priority_ == 1);
         }
